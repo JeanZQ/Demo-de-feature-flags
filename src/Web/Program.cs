@@ -22,13 +22,11 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddConsole();
 
-if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName == "Docker")
-{
+if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName == "Docker"){
     // Configure SQL Server (local)
     Microsoft.eShopWeb.Infrastructure.Dependencies.ConfigureServices(builder.Configuration, builder.Services);
 }
-else
-{
+else{
     // Configure SQL Server (prod)
     var credential = new ChainedTokenCredential(new AzureDeveloperCliCredential(), new DefaultAzureCredential());
     builder.Configuration.AddAzureKeyVault(new Uri(builder.Configuration["AZURE_KEY_VAULT_ENDPOINT"] ?? ""), credential);
@@ -57,7 +55,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
            .AddDefaultUI()
            .AddEntityFrameworkStores<AppIdentityDbContext>()
-           .AddDefaultTokenProviders();
+                           .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<ITokenClaimsService, IdentityTokenClaimService>();
 builder.Configuration.AddEnvironmentVariables();
@@ -68,6 +66,8 @@ builder.Services.AddWebServices(builder.Configuration);
 builder.Services.AddMemoryCache();
 builder.Services.AddRouting(options =>
 {
+    // Replace the type and the name used to refer to it with your own
+    // IOutboundParameterTransformer implementation
     options.ConstraintMap["slugify"] = typeof(SlugifyParameterTransformer);
 });
 
@@ -75,6 +75,7 @@ builder.Services.AddMvc(options =>
 {
     options.Conventions.Add(new RouteTokenTransformerConvention(
              new SlugifyParameterTransformer()));
+
 });
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages(options =>
@@ -97,6 +98,7 @@ var configSection = builder.Configuration.GetRequiredSection(BaseUrlConfiguratio
 builder.Services.Configure<BaseUrlConfiguration>(configSection);
 var baseUrlConfig = configSection.Get<BaseUrlConfiguration>();
 
+// Blazor Admin Required Services for Prerendering
 builder.Services.AddScoped<HttpClient>(s => new HttpClient
 {
     BaseAddress = new Uri(baseUrlConfig!.WebBase)
@@ -114,6 +116,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 var app = builder.Build();
 
 app.Logger.LogInformation("App created...");
+
 app.Logger.LogInformation("Seeding Database...");
 
 using (var scope = app.Services.CreateScope())
@@ -141,7 +144,7 @@ if (!string.IsNullOrEmpty(catalogBaseUrl))
     app.Use((context, next) =>
     {
         context.Request.PathBase = new PathString(catalogBaseUrl);
-        return next;
+        return next();
     });
 }
 
@@ -163,7 +166,6 @@ app.UseHealthChecks("/health",
             await context.Response.WriteAsync(result);
         }
     });
-
 if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Docker")
 {
     app.Logger.LogInformation("Adding Development middleware...");
@@ -188,17 +190,13 @@ app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
 
+
 app.MapControllerRoute("default", "{controller:slugify=Home}/{action:slugify=Index}/{id?}");
 app.MapRazorPages();
 app.MapHealthChecks("home_page_health_check", new HealthCheckOptions { Predicate = check => check.Tags.Contains("homePageHealthCheck") });
 app.MapHealthChecks("api_health_check", new HealthCheckOptions { Predicate = check => check.Tags.Contains("apiHealthCheck") });
+//endpoints.MapBlazorHub("/admin");
 app.MapFallbackToFile("index.html");
-
-// ------------------- NUEVO BLOQUE PARA AZURE LINUX -------------------
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5000"; // Azure asigna PORT dinámicamente
-app.Urls.Clear();
-app.Urls.Add($"http://*:{port}");
-// -------------------------------------------------------------------
 
 app.Logger.LogInformation("LAUNCHING");
 app.Run();
