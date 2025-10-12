@@ -1,6 +1,5 @@
-using System.Net.Mime;
+﻿using System.Net.Mime;
 using Ardalis.ListStartupServices;
-using Azure.Identity;
 using BlazorAdmin;
 using BlazorAdmin.Services;
 using Blazored.LocalStorage;
@@ -18,18 +17,41 @@ using Microsoft.eShopWeb.Web;
 using Microsoft.eShopWeb.Web.Configuration;
 using Microsoft.eShopWeb.Web.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.FeatureManagement;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddAzureAppConfiguration(options =>
+{
+    var connection = builder.Configuration.GetConnectionString("AppConfig");
+
+    options.Connect(connection)
+           .UseFeatureFlags()
+           .ConfigureRefresh(refresh =>
+           {
+               // Este registra la flag principal y habilita refrescar toda la configuración
+               refresh.Register("EnableShoppingCart", refreshAll: true)
+                      .SetCacheExpiration(TimeSpan.FromSeconds(10)); // refresca cada 10 segundos
+           });
+});
+
+
+builder.Services.AddAzureAppConfiguration();
+builder.Services.AddFeatureManagement();
+
 builder.Logging.AddConsole();
 
-if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName == "Docker"){
+if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName == "Docker")
+{
     // Configure SQL Server (local)
     Microsoft.eShopWeb.Infrastructure.Dependencies.ConfigureServices(builder.Configuration, builder.Services);
 }
-else{
+else
+{
     // Configure SQL Server (prod)
     Microsoft.eShopWeb.Infrastructure.Dependencies.ConfigureServices(builder.Configuration, builder.Services);
 }
+
 
 builder.Services.AddCookieSettings();
 
@@ -169,6 +191,8 @@ else
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
+
+app.UseAzureAppConfiguration(); // Nuevo
 
 app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
