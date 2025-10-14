@@ -1,18 +1,27 @@
 ﻿@page "{handler?}"
 @model IndexModel
+﻿@using Microsoft.FeatureManagement
+@inject IFeatureManager FeatureManager
 @{
-    ViewData["Title"] = "Basket";
-}
-<section class="esh-catalog-hero">
-    <div class="container">
-        <img class="esh-catalog-title" src="~/images/main_banner_text.png" />
-    </div>
-</section>
 
+    ViewData["Title"] = "Basket";
+
+}
+@if (await FeatureManager.IsEnabledAsync("EnableHalloween")) {
+    <section class="esh-catalog-hero-halloween">
+    </section>
+} else {
+
+    <section class="esh-catalog-hero">
+        <div class="container">
+            <img class="esh-catalog-title" src="~/images/main_banner_text.png" />
+        </div>
+    </section>
+
+}
 <div class="container">
 
-    @if (Model.BasketModel.Items.Any())
-    {
+    @if (Model.BasketModel.Items.Any()) {
         <form method="post">
             <article class="esh-basket-titles row">
                 <br />
@@ -24,8 +33,7 @@
             </article>
             <div class="esh-catalog-items row">
                 <div asp-validation-summary="All" class="text-danger"></div>
-                @for (int i = 0; i < Model.BasketModel.Items.Count; i++)
-                {
+                @for (int i = 0; i < Model.BasketModel.Items.Count; i++) {
                     var item = Model.BasketModel.Items[i];
                     <article class="esh-basket-items row">
                         <div>
@@ -41,7 +49,6 @@
                             <section class="esh-basket-item esh-basket-item--middle esh-basket-item--mark col-xs-2">$ @Math.Round(item.Quantity * item.UnitPrice, 2).ToString("N2")</section>
                         </div>
                         <div class="row">
-
                         </div>
                     </article>
                 }
@@ -76,9 +83,7 @@
                 </div>
             </div>
         </form>
-    }
-    else
-    {
+    } else {
         <h3 class="esh-catalog-items row">
             Basket is empty.
         </h3>

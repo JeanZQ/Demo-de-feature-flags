@@ -32,6 +32,8 @@ builder.Configuration.AddAzureAppConfiguration(options =>
                // Este registra la flag principal y habilita refrescar toda la configuración
                refresh.Register("EnableShoppingCart", refreshAll: true)
                       .SetCacheExpiration(TimeSpan.FromSeconds(10)); // refresca cada 10 segundos
+               refresh.Register("EnableHalloween", refreshAll: true)
+                      .SetCacheExpiration(TimeSpan.FromSeconds(10));
            });
 });
 

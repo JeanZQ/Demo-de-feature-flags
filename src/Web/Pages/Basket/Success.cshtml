@@ -1,17 +1,29 @@
 ﻿@page
 @model SuccessModel
+﻿@using Microsoft.FeatureManagement
+@inject IFeatureManager FeatureManager
 @{
     ViewData["Title"] = "Checkout Complete";
 }
 
-<section class="esh-catalog-hero">
-    <div class="container">
-        <img class="esh-catalog-title" src="~/images/main_banner_text.png" />
-    </div>
-</section>
+@if (await FeatureManager.IsEnabledAsync("EnableHalloween")) {
+    <section class="esh-catalog-hero-halloween">
+    </section>
+} else {
+    <section class="esh-catalog-hero">
+        <div class="container">
+            <img class="esh-catalog-title" src="~/images/main_banner_text.png" />
+        </div>
+    </section>
+}
 
 <div class="container">
     <h1>Thanks for your Order!</h1>
+    @if (!string.IsNullOrEmpty(Model.SpecialMessage)) {
+        <div class="alert alert-warning text-center mt-4">
+            @Model.SpecialMessage
+        </div>
+    }
 
     <a asp-page="/Index">Continue Shopping...</a>
 </div>

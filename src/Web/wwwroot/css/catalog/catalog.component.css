@@ -4,6 +4,13 @@
   height: 260px;
   width: 100%; }
 
+.esh-catalog-hero-halloween {
+    background-image: url("../../images/halloween_banner.jpg");
+    background-size: cover;
+    height: 500px;
+    width: 100%;
+}
+
 .esh-catalog-title {
   position: relative;
   top: 74.28571px; }
