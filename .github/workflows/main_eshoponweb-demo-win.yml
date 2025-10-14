@@ -1,3 +1,6 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
 name: Build and deploy ASP.Net Core app to Azure Web App - eshoponweb-demo-win
 
 on:
@@ -8,60 +11,55 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     permissions:
-      contents: read # This is required for actions/checkout
+      contents: read #This is required for actions/checkout
 
     steps:
-      # 1️⃣ Clonar el repo
       - uses: actions/checkout@v4
 
-      # 2️⃣ Instalar .NET SDK
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
 
-      # 3️⃣ Publicar solo el proyecto Web
-      - name: Publish Web project
-        working-directory: ./src/Web
-        run: dotnet publish Web.csproj --configuration Release --output ../../publish
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
 
-      # 4️⃣ Subir el artifact para el deploy
+      - name: dotnet publish
+        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
-          name: dotnet-app
-          path: ./publish   # carpeta que contiene los archivos publicados
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: build
     permissions:
-      id-token: write # Required for OIDC
-      contents: read # Required for actions/checkout
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
 
     steps:
-      # 1️⃣ Descargar el artifact del job build
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: dotnet-app
-          path: ./publish   # debe coincidir con la carpeta usada en deploy
-
-      # 2️⃣ Login a Azure usando OIDC
+          name: .net-app
+      
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_241ED28F2473492AA3EFEB6C061A23A6 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_C4191FED20754F71895BAFFD8E80DC67 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C749058C51544217B0F983348CC06405 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_AB57EBF700DA461BBEE00B7F8057B267 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_05D2B633AD824D5FB8D5B9B834F183A0 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_09739F6385C74073810116645ADC9D20 }}
 
-      # 3️⃣ Desplegar en Azure Web App
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'eshoponweb-demo-win'
           slot-name: 'Production'
-          package: ./publish
+          package: .
+          
