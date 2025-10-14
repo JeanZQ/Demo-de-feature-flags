@@ -19,7 +19,7 @@ public class SuccessModel : PageModel
 
     public async Task OnGet()
     {
-        if (await _featureManager.IsEnabledAsync("EnableHalloweenTheme"))
+        if (await _featureManager.IsEnabledAsync("EnableHalloween"))
         {
             SpecialMessage = "🎃 ¡Gracias por tu compra y feliz Halloween! 👻";
         }
