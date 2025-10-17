@@ -1,23 +1,24 @@
 ﻿@page "{handler?}"
 @model IndexModel
-@using Microsoft.FeatureManagement
+﻿@using Microsoft.FeatureManagement
 @inject IFeatureManager FeatureManager
-
 @{
-    ViewData["Title"] = "Basket";
-}
 
+    ViewData["Title"] = "Basket";
+
+}
 @if (await FeatureManager.IsEnabledAsync("EnableHalloween")) {
     <section class="esh-catalog-hero-halloween">
     </section>
 } else {
+
     <section class="esh-catalog-hero">
         <div class="container">
             <img class="esh-catalog-title" src="~/images/main_banner_text.png" />
         </div>
     </section>
-}
 
+}
 <div class="container">
 
     @if (Model.BasketModel.Items.Any()) {

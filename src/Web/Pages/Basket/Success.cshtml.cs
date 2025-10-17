@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.FeatureManagement;
 
@@ -13,6 +9,7 @@ namespace Microsoft.eShopWeb.Web.Pages.Basket;
 public class SuccessModel : PageModel
 {
     private readonly IFeatureManager _featureManager;
+
     public string SpecialMessage { get; private set; } = string.Empty;
 
     public SuccessModel(IFeatureManager featureManager)
@@ -22,7 +19,7 @@ public class SuccessModel : PageModel
 
     public async Task OnGet()
     {
-        if(await _featureManager.IsEnabledAsync("EnableHalloween"))
+        if (await _featureManager.IsEnabledAsync("EnableHalloween"))
         {
             SpecialMessage = "🎃 ¡Gracias por tu compra y feliz Halloween! 👻";
         }

@@ -33,12 +33,11 @@
                 <article class="row">
                     <section class="col-lg-7 col-md-6 col-xs-12">
                         <a asp-area="" asp-page="/Index">
-                            @if (await FeatureManager.IsEnabledAsync("EnableHalloween"))
-                            {
+                            @if (await FeatureManager.IsEnabledAsync("EnableHalloween")) {
                                 <img src="~/images/brand_halloween.png" alt="eShop On Web" />
                             } else
                             {
-                                <img src="~/images/brand.png" alt="eShop On Web" />
+                                 <img src="~/images/brand.png" alt="eShop On Web" />
                             }
                         </a>
                     </section>
