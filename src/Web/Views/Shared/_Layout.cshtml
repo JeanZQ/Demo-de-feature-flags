@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.FeatureManagement
+@inject IFeatureManager FeatureManager
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -30,7 +33,13 @@
                 <article class="row">
                     <section class="col-lg-7 col-md-6 col-xs-12">
                         <a asp-area="" asp-page="/Index">
-                            <img src="~/images/brand.png" alt="eShop On Web" />
+                            @if (await FeatureManager.IsEnabledAsync("EnableHalloween"))
+                            {
+                                <img src="~/images/brand_halloween.png" alt="eShop On Web" />
+                            } else
+                            {
+                                <img src="~/images/brand.png" alt="eShop On Web" />
+                            }
                         </a>
                     </section>
                     <partial name="_LoginPartial" />
